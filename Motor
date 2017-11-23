@@ -1,0 +1,75 @@
+#define MOTOR_A 1
+#define MOTOR_B 2
+#define PINOSENSOR_FRENTE 8
+#define PINOSENSOR_TRAS 12
+#define HORARIO true
+#define ANTIHORARIO false
+
+int i;
+//funcao para acionamento individual de cada motor
+void acionaMotor(int motor, boolean sentido, int velocidade){
+ if (motor == MOTOR_A){
+ digitalWrite(2,sentido);
+ digitalWrite(4,!sentido);
+ analogWrite(3,velocidade);
+ }
+ else if (motor == MOTOR_B){
+ digitalWrite(6,sentido);
+ digitalWrite(7,!sentido);
+ analogWrite(5,velocidade);
+ }
+}
+//funcao para parar o motor
+void paraMotor(int motor, int velocidade){
+ if (motor == MOTOR_A){
+ analogWrite(3,velocidade);
+ }
+ else if (motor == MOTOR_B){
+ analogWrite(5,velocidade);
+ }
+}
+//inicializa pinos
+void setup(){
+  Serial.begin(9600);
+  pinMode(PINOSENSOR_FRENTE,INPUT);
+  pinMode(PINOSENSOR_TRAS, INPUT);
+ for (int i = 2; i < 8; i++){
+ pinMode(i,OUTPUT);
+ }
+ 
+}
+ 
+void loop(){
+  /*PARA OS DOIS SENSORES FAZER O BAGULHO ANDAR*/
+if(!digitalRead(PINOSENSOR_FRENTE) && !digitalRead(PINOSENSOR_TRAS)){
+    Serial.println("Branco: anda na arena");
+    paraMotor(MOTOR_A,0);
+    paraMotor(MOTOR_B,0);
+    acionaMotor(MOTOR_A, ANTIHORARIO, 255);
+    acionaMotor(MOTOR_B, ANTIHORARIO, 255);    
+}
+/*CASO A LINHA ESTEJA NO SENSOR DE TRAS*/
+if(digitalRead(PINOSENSOR_FRENTE) && !digitalRead(PINOSENSOR_TRAS)){
+  Serial.println("Ele pega a linha no sensor de tras");
+  paraMotor(MOTOR_A,0);
+  paraMotor(MOTOR_B,0);
+  acionaMotor(MOTOR_A, ANTIHORARIO, 255);
+  acionaMotor(MOTOR_B, ANTIHORARIO, 255);  
+}
+/*CASO A LINHA ESTEJA NO SENSOR DA FRENTE*/
+if(digitalRead(PINOSENSOR_TRAS) && !digitalRead(PINOSENSOR_FRENTE)){
+  Serial.println("Ele pega a linha no sensor da frente");
+  paraMotor(MOTOR_A,0);
+  paraMotor(MOTOR_B,0);
+  acionaMotor(MOTOR_A, HORARIO, 255);
+  acionaMotor(MOTOR_B, HORARIO, 255);  
+}
+/*ELE PARA QUANDO FOR AS DUAS LINHAS*/
+if(digitalRead(PINOSENSOR_TRAS) && digitalRead(PINOSENSOR_FRENTE)){
+  Serial.println("Ele pega a linha nos dois");
+  acionaMotor(MOTOR_A,ANTIHORARIO,255);
+  acionaMotor(MOTOR_B,HORARIO,100);  
+}
+}
+ 
+
